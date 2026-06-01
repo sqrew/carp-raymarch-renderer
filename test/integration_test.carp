@@ -11,7 +11,7 @@
 (deftest integration-test
   (let [state (Test.State.init 0 0)
         config (Renderer.default-config)
-        materials [(Material.make (Vector3.init 1.0 0.5 0.5) 0.5 0.0)]
+        materials [(Material.make (Vector3.init 1.0 0.5 0.5) 0.5 0.0 0.0)]
         ray (Ray.make (Vector3.init 0.0 0.0 5.0) (Vector3.init 0.0 0.0 -1.0))
         color (Renderer.render-pixel &my-sdf &my-id &materials &ray &config)]
     (do
