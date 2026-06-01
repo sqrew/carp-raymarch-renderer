@@ -31,7 +31,8 @@
           
           view-dir (Vector3.neg (Ray.direction ray))
           base-color (Shading.blinn-phong n &light-dir &view-dir (Material.albedo mat) @(Material.roughness mat) @(Material.metallic mat))
-          final-surface (Shading.apply-occlusion &base-color shadow ao)]
+          final-surface (Shading.apply-occlusion &base-color shadow ao)
+          lit-surface (Vector3.cmul &final-surface light-color)]
       
-      (Vector3.cmul &final-surface light-color)))
+      (Vector3.add &lit-surface (Material.emission mat))))
 )

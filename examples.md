@@ -13,9 +13,13 @@ Demonstrates complex geometry using Boolean operations from `carp-sdf`.
 Shows how to accumulate energy from multiple light sources for more dynamic lighting.
 - **Key Concepts**: Accumulating results from `Renderer.shade-hit`, using colored lights.
 
+### 4. Neon Infinite Grid (`neon_infinite.carp`)
+A high-fidelity showcase of the entire stack's integration.
+- **Key Concepts**: Infinite domain repetition (`Sdf.repeat`), material emission (glow), atmospheric fog, and recursive mirrored floor reflections.
+
 ## Running the Examples
 You can run any example using the Carp REPL:
 ```bash
-carp -x examples/simple_render.carp
+carp -x examples/red_sphere.carp
 ```
-Each example generates a `.ppm` image file in the current directory.
+Each example generates a `.ppm` image file in the `examples/` directory.
