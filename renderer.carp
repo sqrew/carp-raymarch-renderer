@@ -1,0 +1,47 @@
+(load "../carp-raymarch/raymarch.carp")
+(load "../carp-render/visibility.carp")
+(load "../carp-render/shading.carp")
+(load "../carp-render/material.carp")
+(load "../carp-scene/scene.carp")
+
+(doc RenderConfig "unifies parameters across the entire modular stack.")
+(deftype RenderConfig [
+  march RaymarchConfig
+  visibility VisibilityConfig
+])
+
+(defmodule Renderer
+  (doc default-config "returns a balanced configuration for the entire pipeline.")
+  (defn default-config []
+    (RenderConfig.init (Raymarch.default-config) (Visibility.default-config)))
+
+  (doc render-pixel "is the high-level entry point for shading a single ray.
+It performs geometric traversal, identity lookup, visibility solving, and final shading.")
+  (defn render-pixel [sdf-fn hit-fn materials ray config]
+    (let [m-config (RenderConfig.march config)
+          v-config (RenderConfig.visibility config)
+          hit (Raymarch.march sdf-fn ray m-config)]
+      (if @(RaymarchHit.hit &hit)
+        (let [p (RaymarchHit.p &hit)
+              n (RaymarchHit.normal &hit)
+              
+              ;; Single Identity Query at the hit point
+              scene-hit (~hit-fn p)
+              mat (Scene.sample-material materials @(SceneHit.material-id &scene-hit))
+              
+              ;; Setup light (Simple directional for now)
+              light-pos (Vector3.init 10.0 10.0 10.0)
+              light-dir (Vector3.normalize &(Vector3.sub &light-pos p))
+              light-ray (Ray.make (Vector3.add p &(Vector3.mul &light-dir 0.01)) @&light-dir)
+              
+              ;; Solve visibility factors using the geometric solver
+              shadow (Visibility.shadow sdf-fn &light-ray v-config m-config)
+              ao (Visibility.ambient-occlusion sdf-fn &(Ray.make @p @n) v-config)
+              
+              ;; Shading equations (View Dir + Light Dir + Surface Data)
+              view-dir (Vector3.neg (Ray.direction ray))
+              base-color (Shading.blinn-phong n &light-dir &view-dir (Material.albedo mat) @(Material.roughness mat) @(Material.metallic mat))]
+          
+          (Shading.apply-occlusion &base-color shadow ao))
+        (Vector3.init 0.05 0.05 0.08))))
+)
